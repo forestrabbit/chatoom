@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ChatLoginZSC</title>
+    <style>
+        label {
+            display: block;
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            width: 30%;
+        }
+
+        .hint {
+            text-align: right;
+        }
+
+        #submit {
+            width: 25%;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="form">
+        <p></p>
+        <header>我的聊天室</header>
+        <p></p>
+        <span class="hint">用户名：</span>
+        <input type="text" name="userName" autofocus="autofocus" />
+        <span class="ans">*</span>
+        <span class="hint">密码：</span>
+        <input type="password" name="password" />
+        <span class="ans">*</span>
+        <p></p>
+        <button id="submit" onclick="validate()">登录</button>
+        <p></p>
+    </section>
+    <script>
+        let userNameBox = document.querySelector('[name = "userName"]')
+        let passwordBox = document.querySelector('[name = "password"]')
+        let ansBoxes = document.querySelectorAll('.ans')
+        function validate() {
+            let success = true
+            if (userNameBox.value == '') {
+                success = false
+                ansBoxes[0].textContent = '*用户名不能为空'
+            } else {
+                ansBoxes[0].textContent = '*'
+            }
+            if (passwordBox.value == '') {
+                success = false
+                ansBoxes[1].textContent = '*密码不能为空'
+            } else {
+                ansBoxes[1].textContent = '*'
+            }
+            if (success) {
+                submit()
+            }
+        }
+        function submit() {
+            let data = new FormData()
+            data.set('userName', userNameBox.value)
+            data.set('password', passwordBox.value)
+            fetch('/', {
+                method: 'post',
+                body: data
+            }).then(
+                resp => {
+                    switch (resp.status) {
+                        case 200:
+                            resp.text().then(text => {
+                                sessionStorage.setItem('token', text.split(',')[0])
+                                location = text.split(',')[1]
+                            })
+                            break
+                        case 403:
+                            resp.text().then(text => alert(text))
+                            break
+                    }
+                }
+            )
+        }
+    </script>
+</body>
+
+</html>

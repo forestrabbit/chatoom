@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>聊天室</title>
+    <script>
+        var validate = true
+        function onload() {
+            let data = new FormData()
+            data.append('token', sessionStorage.getItem('token'))
+            fetch('/chat', {
+                method: 'post',
+                body: data
+            }).then(resp => {
+                switch (resp.status) {
+                    case 403:
+                        resp.text().then(text => {
+                            alert(text)
+                            validate = false
+                        })
+                        break
+                }
+            })
+        }
+        function getMsg() {
+            setInterval(function () {
+                let data = new FormData()
+                data.append('token', sessionStorage.getItem('token'))
+                fetch('/msg', {
+                    method: 'post',
+                    body: data
+                }).then(resp => {
+                    switch (resp.status) {
+                        case 403:
+                            resp.text().then(text => {
+                                alert(text)
+                            })
+                            break
+                        case 200:
+                            resp.text().then(text => {
+                                document.querySelector('.msg').innerHTML = text
+                            })
+                            break
+                    }
+                })
+            }, 1000)
+        }
+    </script>
+</head>
+
+<body onload="onload()">
+    <article>
+        <section class="msg"></section>
+        <section class="input">
+            <textarea cols="100" rows="30" id="text"></textarea>
+        </section>
+        <button id="submit" onclick="submit()">发送</button>
+    </article>
+    <script>
+        if (validate) {
+            getMsg()
+        } else {
+            alert('没有权限访问')
+        }
+        function submit() {
+            if (validate) {
+                let data = new FormData()
+                data.append('token', sessionStorage.getItem('token'))
+                data.append('msg', document.querySelector('#text').value)
+                fetch('/send', {
+                    method: 'post',
+                    body: data
+                }).then(resp => {
+                    switch (resp.status) {
+                        case 403:
+                            resp.text().then(text => {
+                                alert(text)
+                            })
+                            break
+                    }
+                })
+            } else {
+                alert('没有权限访问')
+            }
+        }
+    </script>
+</body>
+
+</html>
